@@ -3,7 +3,7 @@ RGBanalysis
 
 ## Description
 
-Codes for analysing picture data from film degradation chamber (https://github.com/PV-Lab/hte_degradation_chamber). Analaysis with and without color calibration.
+Codes for analysing picture data from film degradation chamber (https://github.com/PV-Lab/hte_degradation_chamber). Analysis with and without color calibration.
 
 The code assumes that there is a sample holder with 4 (horizontal rows in the picture area) x 7 (vertical columns in the picture area) samples and a small reference color chart with 6x4 color patches in the picture area during the aging test. It also assumes the first picture of the aging test is of Xrite ColorChecker Passport (a reference color chart with 6x4 color patches)
 
