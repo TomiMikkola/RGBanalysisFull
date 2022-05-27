@@ -5,13 +5,15 @@ RGBanalysis
 
 Codes for analysing picture data from film degradation chamber (https://github.com/PV-Lab/hte_degradation_chamber). Analysis with and without color calibration.
 
-The code assumes that there is a sample holder with 4 (horizontal rows in the picture area) x 7 (vertical columns in the picture area) samples and a small reference color chart with 6x4 color patches in the picture area during the aging test. It also assumes the first picture of the aging test is of Xrite ColorChecker Passport (a reference color chart with 6x4 color patches)
+The code assumes that there is a sample holder with 4 (horizontal rows in the picture area) x 7 (vertical columns in the picture area) samples and a small reference color chart with 6x4 color patches in the picture area during the aging test.
+
+The code also assumes that the first picture of the aging test is of Xrite ColorChecker Passport (a reference color chart with 6x4 color patches) and that all the other files in the data folder are pictures of the sample holder. The assumed positioning of the reference color charts is so that the white color patch is on the lower left corner in the picture.
 
 ## Use instructions
 
 The code produces both color calibrated and raw color data as a function of measurement time. The use of color calibration is essential for ensuring repeatable and reproducible results. Approach implemented is described in detail in the ESI of the following article: https://doi.org/10.1016/j.matt.2021.01.008 
 
-Open Main.py and modify according to the instructions in the file. If necessary, use Test_crop_box.py for adjusting crop boxes (for slicing image files into 28 individual samples, a small reference color chart, and Xrite Colorchecker Passport chart).
+Open Main.py and modify according to the instructions in the file. If necessary, use Test_crop_box.py for determining suitable crop boxes (for slicing sample holder image files into 28 individual samples, and for slicing the small reference color chart and Xrite Colorchecker Passport chart into color patches).
 
 An example of the output files is shown in folder 'Results of optical analysis'.
 
