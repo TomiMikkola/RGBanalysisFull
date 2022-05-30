@@ -77,13 +77,17 @@ Evaluate the validity color data:
 - Degradation test illumination conditions remain constant as long as the photographed color of the small reference color chart (that is in the picture area during the whole aging test) remains constant. Any changes indicate issues with illumination conditions that can distort the color calibration results and degradation patterns of the samples.
 - It is assumed that none of the colors of the samples or color patches are not saturated to white (RGB value of 256/256/256) or black (RGB value of 0/0/0). If any of the colors saturates (specifically, Xrite white or black color patches, or very dark samples), the color calibration results are not accurate.
 - It is assumed that the sample pictures are not affected by excessive reflections. Reflections decrease the quality of the data and can be fixed by adjusting the aging testing setup. 
- 
+
+## Versions
+
+- 1.0 / Sep, 2020: Frozen version, in branch V1.0_frozen_year_2020
+- 1.1 / May, 2020: Latest version
 
 ## Authors
 ||                    |
 | ------------- | ------------------------------ |
 | **AUTHORS**      | Armi Tiihonen, Zhe Liu, Siyu I.P. Tian | 
-| **VERSION**      | 1.2 / May, 2022 | 
+| **VERSION**      | 1.1 / May, 2022 | 
 | **EMAILS**      | armi.tiihonen@gmail.com, chris.liuzhe@gmail.com, isaactsy777@hotmail.com  | 
 ||                    |
 
