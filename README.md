@@ -34,11 +34,11 @@ See an example of output analysis results in folder "Results/Example_aging_test/
   - _Samples.pdf_: Mean color of each sample by aging test duration in the same position than in the pictures
   - _Small_CC.pdf_: Mean color of each color patch in the reference color chart by aging test duration in the same position than in the pictures
   - Abbreviations in other filenames:
-    - "__r__", "__g__", "__b__" (in folder _RGB_): Red, green, or blue pixel data, respectively
-    - "__l__", "__a__", "__b__" (in folder _LAB_): LAB L, a, or b pixel data, respectively
-    - "__sample__": Average sample colors vs. time (rows are samples, columns are time points)
-    - "__CC__": Average colors of the color chart patches vs. time (rows are patches, columns are time points)
-    - "__percentiles_hi__" or "__percentiles_lo__": 5% upper and lower percentiles of the color calculated from all the pixels provided for that sample
+    - "_r_", "_g_", "_b_" (in folder _RGB_): Red, green, or blue pixel data, respectively
+    - "_l_", "_a_", "_b_" (in folder _LAB_): LAB L, a, or b pixel data, respectively
+    - "_sample_": Average sample colors vs. time (rows are samples, columns are time points)
+    - "_CC_": Average colors of the color chart patches vs. time (rows are patches, columns are time points)
+    - "_percentiles_hi_" or "_percentiles_lo_": 5% upper and lower percentiles of the color calculated from all the pixels provided for that sample
 - Optional: Videos on the raw and calibrated aging test pictures can be produced if run in Linux.
 
 ## Notes on Color Calibration and Sample Alignment
