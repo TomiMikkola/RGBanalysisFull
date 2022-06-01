@@ -64,19 +64,17 @@ To activate the video feature (Linux only): install ffmpeg (https://github.com/F
 
 ## Use
 
-Open Main.py and modify according to the instructions in the file. Run.
-- If necessary, use Test_crop_box.py for determining suitable crop boxes. Crop boxes are used for slicing the sample holder image files into 28 individual samples, and for slicing the small reference color chart and Xrite Colorchecker Passport chart into color patches.
-
-Video feature has been tested only in Linux and should be commented out in Main.py if using in Windows.
-
-Evaluate the validity color data:
-- Watch the videos if produced by the code. Ensure that:
-  - Samples degrade as you expect (average color data produced in these codes, not spatial).
-  - Color calibration results look natural (a wrong alignment of the Xrite color chart would produce gravely distorted colors).
-  - Crop boxes (shown in the color calibrated video) are not misaligned.
-- Degradation test illumination conditions remain constant as long as the photographed color of the small reference color chart (that is in the picture area during the whole aging test) remains constant. Any changes indicate issues with illumination conditions that can distort the color calibration results and degradation patterns of the samples.
-- It is assumed that none of the colors of the samples or color patches are not saturated to white (RGB value of 256/256/256) or black (RGB value of 0/0/0). If any of the colors saturates (specifically, Xrite white or black color patches, or very dark samples), the color calibration results are not accurate.
-- It is assumed that the sample pictures are not affected by excessive reflections. Reflections decrease the quality of the data and can be fixed by adjusting the aging testing setup. 
+- Open Main.py and modify according to the instructions in the file. Run.
+  - If necessary, use Test_crop_box.py for determining suitable crop boxes. Crop boxes are used for slicing the sample holder image files into 28 individual samples, and for slicing the small reference color chart and Xrite Colorchecker Passport chart into color patches.
+  - Video feature has been tested only in Linux and should be commented out in Main.py if using in Windows.
+- Evaluate the validity color data:
+  - Watch the videos if produced by the code. Ensure that:
+    - Samples degrade as you expect (average color data produced in these codes, not spatial).
+    - Color calibration results look natural (a wrong alignment of the Xrite color chart would produce gravely distorted colors).
+    - Crop boxes (shown in the color calibrated video) are not misaligned.
+  - Check that the degradation test illumination conditions remain constant, i.e., the photographed colors of the small reference color chart remains constant during the whole aging test. Any changes indicate issues with illumination conditions that can distort the color calibration results and degradation patterns of the samples.
+  - This code assumes that none of the colors of the samples or color patches are saturated to white (RGB value of 256/256/256) or black (RGB value of 0/0/0). The color calibration results are not accurate if saturation appears so change the camera settings if this happens. Xrite white or black color patches, or very dark samples are prone to saturation.
+  - This code assumes that the sample pictures are not affected by excessive reflections. Reflections decrease the quality of the data and can be fixed by adjusting the aging testing setup. 
 
 ## Versions
 
