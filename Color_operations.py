@@ -311,7 +311,7 @@ def plot_colors(pic_path, crop_box, offset_array, color_array, save_to_folder,
     ax_patches.imshow(Image.fromarray(reconstr_CC, 'RGB'))
     #print('print_out', print_out)
     if print_out == 1:
-        plt.show(fig_CC)
+        plt.show()
     
     if savefig == 1:
         if not os.path.exists(save_to_folder):

@@ -224,7 +224,7 @@ def rgb_extractor(pic_folder, crop_box_samples, offset_array_samples,
         [fig_CC, ax_CC, reconstr_CC, image_CC]= image_slicing(image_ColorCard, col_num_CC, row_num_CC, offset_array_CC)
         if (print_out_interval > 0) & (counter % print_out_interval == 0):
             ax_CC.imshow(Image.fromarray(np.array(image_ColorCard, dtype=np.uint8), 'RGB'))
-            plt.show(fig_CC)
+            plt.show()
         plt.close(fig_CC)
         
         CC_RGBlist = []
@@ -240,7 +240,7 @@ def rgb_extractor(pic_folder, crop_box_samples, offset_array_samples,
             image_ROI_Sample, col_num_Sample, row_num_Sample, offset_array_Sample)
         if (print_out_interval > 0) & (counter % print_out_interval == 0):
             ax_ROI.imshow(Image.fromarray(np.array(image_ROI_Sample, dtype=np.uint8), 'RGB'))
-            plt.show(fig_ROI)
+            plt.show()
         plt.close(fig_ROI)
         
         
@@ -248,7 +248,7 @@ def rgb_extractor(pic_folder, crop_box_samples, offset_array_samples,
         Sample_RGBlist_hi = []
         Sample_RGBlist_lo = []
         for img in image_ROI:
-            [r,g,b] = [np.mean(img[:,:,0]),np.mean(img[:,:,1]),np.mean(img[:,:,2])]
+            [r,g,b] = [np.mean(img[:,:,0]),np.mean(img[:,:,1]),np.mean(img[:,:,2])]    #mean here!!!
             [r_hi,g_hi,b_hi] = [np.percentile(img[:,:,0],95),np.percentile(img[:,:,1],95),np.percentile(img[:,:,2],95)]
             [r_lo,g_lo,b_lo] = [np.percentile(img[:,:,0],5),np.percentile(img[:,:,1],5),np.percentile(img[:,:,2],5)]
     

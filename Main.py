@@ -156,9 +156,9 @@ comments = ['-', '-', '-', '-',
 # assumes the (alphabetically) first picture in the folder has been taken of
 # Xrite color chart (i.e., this picture will not be analyzed) and all the other
 # pictures are taken of sample holder (these pictures will be analyzed). 
-pic_folder = './20190419-R1-AT/BMP'
+pic_folder = 'C:\\Users\\tomim\OneDrive\Työpöytä\Työt\Python\Example data and code - RGB\Data\\20201112-R1-RN\BMP'
 # Give the name of the picture that has been taken taken of Xrite color chart.
-pic_name_Xrite = '20190418144438.bmp'
+pic_name_Xrite = '20201112223424.bmp'
 
 # Give the settings for finding the samples and color chart patches from the
 # pics.
@@ -273,3 +273,4 @@ save_as_video(save_to_folder_raw, crop_box_samples, crop_box_CC, 0, 'jpg', 'Raw_
 save_as_video(save_to_folder_cal, crop_box_samples, crop_box_CC, 0, 'jpg', 'Calibrated_mean_colors')
 
 
+print("end")
