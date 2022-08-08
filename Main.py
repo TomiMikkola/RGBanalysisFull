@@ -40,7 +40,7 @@ def save_results(results, colorspace, calibrated, sample_description):
     if colorspace == 'RGB':
         if calibrated == 0:
             folderpath = './RGB/Raw'
-            filename_body = ['_r.csv', '_g.csv', '_b.csv']
+            filename_body = ['_r.npy', '_g.npy', '_b.npy']
         elif calibrated == 1:
             folderpath = './RGB/Calibrated'
             filename_body = ['_r_cal.csv', '_g_cal.csv', '_b_cal.csv']
@@ -55,9 +55,9 @@ def save_results(results, colorspace, calibrated, sample_description):
     if not os.path.exists(folderpath):
         os.makedirs(folderpath)
             
-    np.savetxt(folderpath+'/sample'+filename_body[0], sample[:,:,0], delimiter=",")
-    np.savetxt(folderpath+'/sample'+filename_body[1], sample[:,:,1], delimiter=",")
-    np.savetxt(folderpath+'/sample'+filename_body[2], sample[:,:,2], delimiter=",")
+    np.save(folderpath+'/sample'+filename_body[0], sample[0])
+    np.save(folderpath+'/sample'+filename_body[1], sample[1])
+    np.save(folderpath+'/sample'+filename_body[2], sample[2])
     np.savetxt(folderpath+'/CC'+filename_body[0], CC[:,:,0], delimiter=",")
     np.savetxt(folderpath+'/CC'+filename_body[1], CC[:,:,1], delimiter=",")
     np.savetxt(folderpath+'/CC'+filename_body[2], CC[:,:,2], delimiter=",")
@@ -68,9 +68,9 @@ def save_results(results, colorspace, calibrated, sample_description):
     np.savetxt(folderpath+'/sample_percentiles_hi'+filename_body[1], sample_percentiles_hi[:,:,1], delimiter=",")
     np.savetxt(folderpath+'/sample_percentiles_hi'+filename_body[2], sample_percentiles_hi[:,:,2], delimiter=",")
     np.savetxt(folderpath+"/times.csv", times, delimiter=",")
-        
-    fig_samples.savefig(folderpath+'/Samples.pdf')
-    fig_CC.savefig(folderpath+'/Small_CC.pdf')
+
+    #fig_samples.savefig(folderpath+'/Samples.pdf')
+    #fig_CC.savefig(folderpath+'/Small_CC.pdf')
     
     #Let's save the details of the samples in a format that is compatible with
     #GPyOpt_Campaign.
@@ -167,13 +167,13 @@ crop_box_CC = (483,200,680,320) # Small color chart
 offset_array_CC = [[8,8],[8,8]]
 crop_box_samples = (270,390,785,845) # Films on sample holder
 offset_array_samples = [[33,18],[18,18]]
-crop_box_Xrite = (360+0,250+245,850-80,850-80) # Xrite passport
+crop_box_Xrite = (380,250+240,830,790) # Xrite passport
 offset_array_Xrite = [[20,20],[20,20]]
 
 # How often do you want to print out figures? The cropping of every nth pic
 # will be printed to the console. For short aging tests, value 1 is
 # good, for very long ones you might put even 250 to make the code run faster.
-print_out_interval = 1
+print_out_interval = 3
 
 ###############################################################################
 
@@ -225,7 +225,7 @@ save_results(results_lab, 'Lab', 0, sample_description)
 
 # Let's perform color calibration and save the data in both RGB and Lab
 # formats.
-[results_rgb_cal, results_lab_cal] = color_calibration_results(results_rgb,
+[results_rgb_cal, results_lab_cal] = color_calibration_results(results_rgb, results_lab,
     [pic_folder, pic_name_Xrite, crop_box_Xrite, offset_array_Xrite])    
 save_results(results_rgb_cal, 'RGB', 1, sample_description)   
 save_results(results_lab_cal, 'Lab', 1, sample_description)   
@@ -258,8 +258,8 @@ for i in range(0,len(results_rgb[-1])):
     if (print_out_interval > 0) & (i % print_out_interval == 0):
         print_out = 1
         pic_path = results_rgb[-1][i]
-        color_array_raw = results_rgb[0][:,i,:]
-        color_array_cal = results_rgb_cal[0][:,i,:]
+        color_array_raw = results_rgb[0][:,:,:,:,i]
+        color_array_cal = results_rgb_cal[0][:,:,:,:,i]
         #print('i',i)
         plot_colors(pic_path, crop_box, offset_array,
                 color_array_raw, save_to_folder_raw, savefig, '', print_out)

@@ -248,16 +248,16 @@ def rgb_extractor(pic_folder, crop_box_samples, offset_array_samples,
         Sample_RGBlist_hi = []
         Sample_RGBlist_lo = []
         for img in image_ROI:
-            [r,g,b] = [np.mean(img[:,:,0]),np.mean(img[:,:,1]),np.mean(img[:,:,2])]    #mean here!!!
+            [r,g,b] = [img[:,:,0],img[:,:,1],img[:,:,2]]
             [r_hi,g_hi,b_hi] = [np.percentile(img[:,:,0],95),np.percentile(img[:,:,1],95),np.percentile(img[:,:,2],95)]
             [r_lo,g_lo,b_lo] = [np.percentile(img[:,:,0],5),np.percentile(img[:,:,1],5),np.percentile(img[:,:,2],5)]
     
             Sample_RGBlist.append([r,g,b])
             Sample_RGBlist_hi.append([r_hi,g_hi,b_hi])
             Sample_RGBlist_lo.append([r_lo,g_lo,b_lo])
-        sample_r_timeseries.append(np.array(Sample_RGBlist)[...,0])
-        sample_g_timeseries.append(np.array(Sample_RGBlist)[...,1])
-        sample_b_timeseries.append(np.array(Sample_RGBlist)[...,2])
+        sample_r_timeseries.append(np.array(Sample_RGBlist)[:,0,:,:])
+        sample_g_timeseries.append(np.array(Sample_RGBlist)[:,1,:,:])
+        sample_b_timeseries.append(np.array(Sample_RGBlist)[:,2,:,:])
         
         sample_r_hi_timeseries.append(np.array(Sample_RGBlist_hi)[...,0])
         sample_g_hi_timeseries.append(np.array(Sample_RGBlist_hi)[...,1])
@@ -278,9 +278,9 @@ def rgb_extractor(pic_folder, crop_box_samples, offset_array_samples,
     CC_b_timeseries = np.array(CC_b_timeseries).T
     
     # RGB time series for Sample
-    sample_r_timeseries = np.array(sample_r_timeseries).T
-    sample_g_timeseries = np.array(sample_g_timeseries).T
-    sample_b_timeseries = np.array(sample_b_timeseries).T
+    sample_r_timeseries = np.transpose(sample_r_timeseries, (1,3,2,0)) 
+    sample_g_timeseries = np.transpose(sample_g_timeseries, (1,3,2,0)) 
+    sample_b_timeseries = np.transpose(sample_b_timeseries, (1,3,2,0)) 
     
     sample_r_hi_timeseries = np.array(sample_r_hi_timeseries).T
     sample_g_hi_timeseries = np.array(sample_g_hi_timeseries).T
@@ -303,9 +303,9 @@ def rgb_extractor(pic_folder, crop_box_samples, offset_array_samples,
     
     order = np.argsort(t)
     t_sort = t[order]
-    r_sort = sample_r_timeseries[:,order]
-    g_sort = sample_g_timeseries[:,order]
-    b_sort = sample_b_timeseries[:,order]
+    r_sort = sample_r_timeseries[:,:,:,order]
+    g_sort = sample_g_timeseries[:,:,:,order]
+    b_sort = sample_b_timeseries[:,:,:,order]
     CC_r_sort = CC_r_timeseries[:,order]
     CC_g_sort = CC_g_timeseries[:,order]
     CC_b_sort = CC_b_timeseries[:,order]
@@ -317,7 +317,7 @@ def rgb_extractor(pic_folder, crop_box_samples, offset_array_samples,
     b_lo_sort = sample_b_lo_timeseries[:,order]
     picfiles_sort = list( picfiles[i] for i in order)
     
-    sample_rgb = [r_sort, g_sort, b_sort]
+    sample_rgb = np.array([r_sort, g_sort, b_sort])
     sample_rgb_percentiles_lo = [r_lo_sort, g_lo_sort, b_lo_sort] 
     sample_rgb_percentiles_hi = [r_hi_sort, g_hi_sort, b_hi_sort]
     CC_rgb = [CC_r_sort, CC_g_sort, CC_b_sort]
@@ -329,14 +329,14 @@ def rgb_extractor(pic_folder, crop_box_samples, offset_array_samples,
     #%% RGB vs time plots (sorting disabled because has already been done above)
     [fig_CC, axs_CC, fig_samples, axs_samples] = plot_aging_data(
                     row_num_CC,col_num_CC,t_sort, CC_r_sort, CC_g_sort, CC_b_sort,
-                    row_num_Sample,col_num_Sample,r_sort, g_sort, b_sort,
+                    row_num_Sample,col_num_Sample,r_sort[:,2,2,:], g_sort[:,2,2,:], b_sort[:,2,2,:],
                     r_hi_sort, g_hi_sort, b_hi_sort,
                     r_lo_sort, g_lo_sort, b_lo_sort, 'RGB')
     
     results = [sample_rgb, sample_rgb_percentiles_lo, sample_rgb_percentiles_hi, CC_rgb]
     
-    counter = 0
-    for result_item in results:
+    counter = 1
+    for result_item in results[1:4]:
         result_item = np.array(result_item)
         result_item = np.swapaxes(result_item,0,1)
         result_item = np.swapaxes(result_item,1,2)

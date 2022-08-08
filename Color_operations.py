@@ -17,7 +17,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.collections import PatchCollection
 import os
-
+import requests
+import concurrent.futures
+from time import time
 
 
 
@@ -39,42 +41,105 @@ def convert_color_space(data, from_space, to_space):
     # n_times (i.e., many time points) and for inputs containing only one time
     # point.
     n_d = data.ndim
+    converted = np.array([])
     if n_d == 2:
         data = np.expand_dims(data, 1)
+    elif n_d == 5:
+        data = data
     elif n_d != 3:
         raise Exception('Faulty number of dimensions in the input!')
     if (from_space == 'RGB') and (to_space == 'Lab'):
         # Values from rgb_extractor() are [0,255] so let's normalize.
         data = data/255
         # Transform to color objects (either sRGBColor or LabColor).
-        data_objects = np.vectorize(lambda x,y,z: sRGBColor(x,y,z))(
-            data[:,:,0], data[:,:,1], data[:,:,2])
-        # Target color space
-        color_space = matlib.repmat(LabColor, *data_objects.shape)
-        # Transform from original space to new space 
-        converted_objects = np.vectorize(lambda x,y: convert_color(x,y))(
-            data_objects, color_space)
-        # We got a matrix of color objects. Let's transform to a 3D matrix of floats.
-        converted = np.transpose(np.vectorize(lambda x: (x.lab_l, x.lab_a, x.lab_b))(
-            converted_objects), (1,2,0))
-        # This one works too. I don't know which one would be better.
-        #converted = np.array([[(converted_objects[x,y].lab_l,
-        #                         converted_objects[x,y].lab_a,
-        #                         converted_objects[x,y].lab_b) for y in range(
-        #                         converted_objects.shape[1])] for x in range(
-        #                         converted_objects.shape[0])])
-        # We want output to be in the same shape than the input.
+        if n_d == 5:
+            print("RGB to Lab")
+            data_r = data[0,:,:,:,:]
+            data_g = data[1,:,:,:,:]
+            data_b = data[2,:,:,:,:]
+            converted = np.zeros(data.shape)
+            #converted = np.array([])
+            #converted2 = np.array([])
+
+            def convert_rgb_lab_section(i):
+                for j in range(data_r.shape[1]):
+                    data_objects = np.vectorize(lambda x,y,z: sRGBColor(x,y,z))(
+                        data_r[i,j,:,:], data_g[i,j,:,:], data_b[i,j,:,:])
+                    color_space = matlib.repmat(LabColor, *data_objects.shape)
+                    # Transform from original space to new space 
+                    converted_objects = np.vectorize(lambda x,y: convert_color(x,y))(
+                        data_objects, color_space)
+                    # We got a matrix of color objects. Let's transform to a 3D matrix of floats.
+                    converted3 = np.transpose(np.vectorize(lambda x: (x.lab_l, x.lab_a, x.lab_b))(
+                        converted_objects), (1,2,0))
+                    converted3 = np.swapaxes(converted3,0,2)
+                    converted3 = np.swapaxes(converted3,1,2)
+                    converted[:,i,j,:,:] = converted3
+
+            start = time()
+            processes = []
+            #with concurrent.futures.ProcessPoolExecutor() as executor:
+            for i in range(data_r.shape[0]):
+                print(f"{i}/{data_r.shape[0]}")
+                #processes.append(executor.submit(convert_rgb_lab_section, i))
+                convert_rgb_lab_section(i)
+
+
+            #for task in as_completed(processes):
+            #    print(task.result())
+            #    
+            #print(f'Time taken: {time() - start}')
+        
+        else:
+            # Transform to color objects (either sRGBColor or LabColor).
+            data_objects = np.vectorize(lambda x,y,z: sRGBColor(x,y,z))(
+                data[:,:,0], data[:,:,1], data[:,:,2])
+            # Target color space
+            color_space = matlib.repmat(LabColor, *data_objects.shape)
+            # Transform from original space to new space 
+            converted_objects = np.vectorize(lambda x,y: convert_color(x,y))(
+                data_objects, color_space)
+            # We got a matrix of color objects. Let's transform to a 3D matrix of floats.
+            converted = np.transpose(np.vectorize(lambda x: (x.lab_l, x.lab_a, x.lab_b))(
+                converted_objects), (1,2,0))
+            # This one works too. I don't know which one would be better.
+            #converted = np.array([[(converted_objects[x,y].lab_l,
+            #                         converted_objects[x,y].lab_a,
+            #                         converted_objects[x,y].lab_b) for y in range(
+            #                         converted_objects.shape[1])] for x in range(
+            #                         converted_objects.shape[0])])
+            # We want output to be in the same shape than the input.
     elif (from_space == 'Lab') and (to_space == 'RGB'):
-        data_objects = np.vectorize(lambda x,y,z: LabColor(x,y,z))(
-            data[:,:,0], data[:,:,1], data[:,:,2])
-        color_space = matlib.repmat(sRGBColor, *data_objects.shape)
-        converted_objects = np.vectorize(lambda x,y: convert_color(x,y))(
-            data_objects, color_space)
-        converted = np.transpose(np.vectorize(lambda x: (x.rgb_r, x.rgb_g, x.rgb_b))(
-            converted_objects), (1,2,0))
-        # Colormath library interprets rgb in [0,1] and we want [0,255] so let's
-        # normalize to [0,255].
-        converted = converted*255
+        if n_d == 3:
+            data_objects = np.vectorize(lambda x,y,z: LabColor(x,y,z))(
+                data[:,:,0], data[:,:,1], data[:,:,2])
+            color_space = matlib.repmat(sRGBColor, *data_objects.shape)
+            converted_objects = np.vectorize(lambda x,y: convert_color(x,y))(
+                data_objects, color_space)
+            converted = np.transpose(np.vectorize(lambda x: (x.rgb_r, x.rgb_g, x.rgb_b))(
+                converted_objects), (1,2,0))
+            # Colormath library interprets rgb in [0,1] and we want [0,255] so let's
+            # normalize to [0,255].
+            converted = converted*255
+        elif n_d == 5:
+            print("Lab to RGB")
+            converted = np.zeros(data.shape)
+            for i in range(data.shape[1]):
+                print(f"{i}/{data.shape[1]}")
+                for j in range(data.shape[2]):
+                    data_objects = np.vectorize(lambda x,y,z: LabColor(x,y,z))(
+                    data[0,i,j,:,:], data[1,i,j,:,:], data[2,i,j,:,:])
+                    color_space = matlib.repmat(sRGBColor, *data_objects.shape)
+                    converted_objects = np.vectorize(lambda x,y: convert_color(x,y))(
+                        data_objects, color_space)
+                    converted2 = np.transpose(np.vectorize(lambda x: (x.rgb_r, x.rgb_g, x.rgb_b))(
+                        converted_objects), (1,2,0))
+                    converted2 = np.swapaxes(converted2,0,2)
+                    converted2 = np.swapaxes(converted2,1,2)
+                    # Colormath library interprets rgb in [0,1] and we want [0,255] so let's
+                    # normalize to [0,255].
+                    converted[:,i,j,:,:] = converted2*255
+                    
     else:
         raise Exception('The given input space conversions have not been implemented.')
     if n_d == 2:
@@ -85,7 +150,7 @@ def convert_color_space(data, from_space, to_space):
 #pic_folder_Xrite = pic_folder
 
 
-def color_calibration(sample_rgb, pic_folder_Xrite, pic_name_Xrite,
+def color_calibration(sample_rgb, sample_lab, pic_folder_Xrite, pic_name_Xrite,
                       crop_box_Xrite, offset_array_Xrite):
 
     
@@ -113,7 +178,6 @@ def color_calibration(sample_rgb, pic_folder_Xrite, pic_name_Xrite,
                                     crop_box_Xrite, offset_array_Xrite)
     # Convert from RGB to Lab color space.
     CC_lab = convert_color_space(CC_rgb, 'RGB', 'Lab')
-    sample_lab = convert_color_space(sample_rgb, 'RGB', 'Lab')
     
     
     ###########################
@@ -155,32 +219,68 @@ def color_calibration(sample_rgb, pic_folder_Xrite, pic_name_Xrite,
           CC_lab_double_transformation, 'subtracted: ', reference_CC_lab-CC_lab_double_transformation[0:-4,:])
     # --> Went ok!
 
-    # Let's perform color calibration for the sample points!
-    N_samples = sample_lab.shape[0]
-    N_times = sample_lab.shape[1]
-    sample_lab_cal = np.zeros((N_samples,N_times+4,3))
-    # We are recalculating P and K for each sample, but using the WA calculated above.
-    for s in range(N_samples):
-        # Data points of color chart in the original space.
-        P_new = np.concatenate((np.ones((N_times,1)), sample_lab[s,:,:]), axis=1)
-        K_new = np.zeros((N_times,N_patches))
-        # For each time point (i.e., picture):
-        for i in range(N_times):
-            # For each color patch in Xrite color chart:
-            for j in range(N_patches):
-                #if i != j:
-                r_ij = np.sqrt((P_new[i,0+1]-P[j,0+1])**2 + (P_new[i,1+1]-P[j,1+1])**2 + (P_new[i,2+1]-P[j,2+1])**2)
-                U_ij = 2* (r_ij**2)* np.log(r_ij + 10**(-20))
-                K_new[i,j] = U_ij
-        #sample_lab_cal[s,:,:] = np.matmul(np.concatenate((K_new,P_new),axis=1), WA)
-        dennom = np.concatenate((K_new,P_new),axis=1)
-        denden = np.concatenate((np.transpose(P), np.zeros((4,4))), axis=1)
-        sample_lab_cal[s,:,:] = np.matmul(np.concatenate((dennom, denden), axis=0), WA)
-    # Remove zeros, i.e., the last four rows from the third dimension.
-    sample_lab_cal = sample_lab_cal[:,0:-4,:]
-    ################################
-    # Color calibration is done now.
-    
+    n_d = sample_lab.ndim
+    if n_d == 3:
+        # Let's perform color calibration for the sample points!
+        N_samples = sample_lab.shape[0]
+        N_times = sample_lab.shape[1]
+        sample_lab_cal = np.zeros((N_samples,N_times+4,3))
+        # We are recalculating P and K for each sample, but using the WA calculated above.
+        for s in range(N_samples):
+            # Data points of color chart in the original space.
+            P_new = np.concatenate((np.ones((N_times,1)), sample_lab[s,:,:]), axis=1)  ######
+            K_new = np.zeros((N_times,N_patches))
+            # For each time point (i.e., picture):
+            for i in range(N_times):
+                # For each color patch in Xrite color chart:
+                for j in range(N_patches):
+                    #if i != j:
+                    r_ij = np.sqrt((P_new[i,0+1]-P[j,0+1])**2 + (P_new[i,1+1]-P[j,1+1])**2 + (P_new[i,2+1]-P[j,2+1])**2)
+                    U_ij = 2* (r_ij**2)* np.log(r_ij + 10**(-20))
+                    K_new[i,j] = U_ij
+            #sample_lab_cal[s,:,:] = np.matmul(np.concatenate((K_new,P_new),axis=1), WA)
+            dennom = np.concatenate((K_new,P_new),axis=1)
+            denden = np.concatenate((np.transpose(P), np.zeros((4,4))), axis=1)
+            sample_lab_cal[s,:,:] = np.matmul(np.concatenate((dennom, denden), axis=0), WA)
+        # Remove zeros, i.e., the last four rows from the third dimension.
+        sample_lab_cal = sample_lab_cal[:,0:-4,:]
+        ################################
+        # Color calibration is done now.
+    elif n_d == 5:
+        sample_lab_cal = np.zeros(sample_lab.shape)
+        print("Main color conversion loop:")
+        for x in range(sample_lab.shape[2]):
+            print(f"{x}/{sample_lab.shape[2]}")
+            for y in range(sample_lab.shape[3]):
+                # Let's perform color calibration for the sample points!
+                sample_lab2 = sample_lab[:,:,x,y,:]
+                N_samples = sample_lab2.shape[1]
+                N_times = sample_lab2.shape[2]
+                sample_lab_cal2 = np.zeros((3,N_samples,N_times+4))
+                # We are recalculating P and K for each sample, but using the WA calculated above.
+                for s in range(N_samples):
+                    # Data points of color chart in the original space.
+                    P_new = np.concatenate((np.ones((N_times,1)), np.swapaxes(sample_lab2[:,s,:],0,1)), axis=1)  ######
+                    K_new = np.zeros((N_times,N_patches))
+                    # For each time point (i.e., picture):
+                    for i in range(N_times):
+                        # For each color patch in Xrite color chart:
+                        for j in range(N_patches):
+                            #if i != j:
+                            r_ij = np.sqrt((P_new[i,0+1]-P[j,0+1])**2 + (P_new[i,1+1]-P[j,1+1])**2 + (P_new[i,2+1]-P[j,2+1])**2)
+                            U_ij = 2* (r_ij**2)* np.log(r_ij + 10**(-20))
+                            K_new[i,j] = U_ij
+                    #sample_lab_cal[s,:,:] = np.matmul(np.concatenate((K_new,P_new),axis=1), WA)
+                    dennom = np.concatenate((K_new,P_new),axis=1)
+                    denden = np.concatenate((np.transpose(P), np.zeros((4,4))), axis=1)
+                    sample_lab_cal2[:,s,:] = np.swapaxes(np.matmul(np.concatenate((dennom, denden), axis=0), WA),0,1)
+                # Remove zeros, i.e., the last four rows from the third dimension.
+                sample_lab_cal2 = sample_lab_cal2[:,:,0:-4]
+                sample_lab_cal[:,:,x,y,:] = sample_lab_cal2
+        ################################
+        # Color calibration is done now.
+    else:
+        raise Exception('Faulty number of dimensions in the input!')
     # Let's transform back to rgb.
     sample_rgb_cal = convert_color_space(sample_lab_cal, 'Lab', 'RGB')
     
@@ -195,12 +295,12 @@ def color_conversion_results(results_rgb):
     for i in range(0,4):
         results_lab[i] = convert_color_space(results_rgb[i], 'RGB', 'Lab')
     # Let's plot the data.
-    [results_lab[5], ax_CC, results_lab[6], ax_samples] = plot_results(
-            results_lab, 'Lab')
+    #[results_lab[5], ax_CC, results_lab[6], ax_samples] = plot_results(
+    #        results_lab, 'Lab')
     return results_lab
     
 
-def color_calibration_results(results_rgb, color_cal_inputs):
+def color_calibration_results(results_rgb, results_lab, color_cal_inputs):
     pic_folder = color_cal_inputs[0]
     pic_name_Xrite = color_cal_inputs[1]
     crop_box_Xrite = color_cal_inputs[2]
@@ -208,7 +308,7 @@ def color_calibration_results(results_rgb, color_cal_inputs):
     results_rgb_cal = [0,0,0,0, results_rgb[4], 0, 0, results_rgb[7]]
     results_lab_cal = [0,0,0,0, results_rgb[4], 0, 0, results_rgb[7]]
     for i in range(0,4):
-        (results_rgb_cal[i], results_lab_cal[i]) = color_calibration(results_rgb[i],
+        (results_rgb_cal[i], results_lab_cal[i]) = color_calibration(results_rgb[i], results_lab[i],
                                         pic_folder, pic_name_Xrite,
                                         crop_box_Xrite, offset_array_Xrite)
 
@@ -228,9 +328,9 @@ def plot_results(results, datatype):
     CC_r_sort = results[3][:,:,0]
     CC_g_sort = results[3][:,:,1]
     CC_b_sort = results[3][:,:,2]
-    r_sort = results[0][:,:,0]
-    g_sort = results[0][:,:,1]
-    b_sort = results[0][:,:,2]
+    r_sort = results[0][0,:,:,:,:]
+    g_sort = results[0][1,:,:,:,:]
+    b_sort = results[0][2,:,:,:,:]
     r_lo_sort = results[1][:,:,0]
     g_lo_sort = results[1][:,:,1]
     b_lo_sort = results[1][:,:,2]
@@ -240,7 +340,7 @@ def plot_results(results, datatype):
     
     [fig_CC, ax_CC, fig_samples, ax_samples] = plot_aging_data(
                     4,6,t_sort, CC_r_sort, CC_g_sort, CC_b_sort,
-                    7,4,r_sort, g_sort, b_sort,
+                    7,4,r_sort[:,2,2,:], g_sort[:,2,2,:], b_sort[:,2,2,:],
                     r_hi_sort, g_hi_sort, b_hi_sort,
                     r_lo_sort, g_lo_sort, b_lo_sort, datatype)
     
@@ -306,8 +406,6 @@ def plot_colors(pic_path, crop_box, offset_array, color_array, save_to_folder,
      ax_patches]=color_patches_and_image_slicing(
             image_ROI, col_num_CC, row_num_CC, offset_array_CC, color_array)
     
-    ax_CC.imshow(Image.fromarray(np.array(image_ROI, dtype=np.uint8), 'RGB'))
-    
     ax_patches.imshow(Image.fromarray(reconstr_CC, 'RGB'))
     #print('print_out', print_out)
     if print_out == 1:
@@ -317,8 +415,10 @@ def plot_colors(pic_path, crop_box, offset_array, color_array, save_to_folder,
         if not os.path.exists(save_to_folder):
             os.makedirs(save_to_folder)
         name1 = create_pic_name_and_path(pic_path, save_to_folder, name_append + '1', 'jpg')
+        name2 = create_pic_name_and_path(pic_path, save_to_folder, name_append + '1', 'png')
         #name2 = create_pic_name_and_path(pic_path, save_to_folder, name_append + '2', 'jpg')
         fig_CC.savefig(name1)
+        fig_CC.savefig(name2)
         #fig_patches.savefig(name1)
     plt.close(fig_CC)
     return None#(Xrite_rgb)
@@ -331,7 +431,8 @@ def color_patches_and_image_slicing(image_array, col_num, row_num, offset_array,
     
     fig,ax = plt.subplots(1)#,figsize=(5,5))
     fig_patches, ax_patches = plt.subplots(1)#,figsize=(5,5))
-    #all_patches = []
+    ax.imshow(Image.fromarray(np.array(image_array, dtype=np.uint8), 'RGB'))
+
     images = []
     imagecol = []
     for y in np.arange(row_num):
@@ -349,16 +450,19 @@ def color_patches_and_image_slicing(image_array, col_num, row_num, offset_array,
             # Create a Rectangle patch
             lw=1 # Line width
             ec='r' # edge color
-            fc=tuple(color_array[y*col_num + x]/255) # face color
+            fc='none'
+            img = np.transpose(color_array[:,y*col_num + x,:,:]/255, (2,1,0))
             rect = patches.Rectangle((x1,y1),x2-x1,y2-y1,
                                       linewidth=lw,edgecolor=ec,facecolor=fc)
             rect2 = patches.Rectangle(((x2-x1)*x,(y2-y1)*y),x2-x1,y2-y1,
                                       linewidth=lw,edgecolor=ec,facecolor=fc)
             ax.add_patch(rect)
+            img = ax.imshow(img, extent=(x1,x2,y1,y2), origin='lower')
             ax_patches.add_patch(rect2)
 
         imagecol.append(np.concatenate(imagerow, axis=1))
     image_reconstr = np.array(np.concatenate(imagecol, axis=0), dtype=np.uint8)
+    ax.imshow(Image.fromarray(np.array(image_array, dtype=np.uint8), 'RGB'), alpha=0)
     return [fig, ax, image_reconstr, images, fig_patches, ax_patches]
 
 
