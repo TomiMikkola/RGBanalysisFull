@@ -7,7 +7,7 @@ Created on Wed Mar 13 21:41:16 2019
 #from Color_plotting import plot_colors
 from RGB_extractor import rgb_extractor
 #from RGB_extractor_Xrite_CC import rgb_extractor_Xrite_CC
-from Color_operations import color_calibration_results, color_conversion_results, plot_colors
+from Color_operations import color_calibration_results, color_conversion_results, plot_colors, rgb_extractor_Xrite_CC
 from Video import save_as_video
 import os
 import pandas as pd
@@ -156,24 +156,25 @@ comments = ['-', '-', '-', '-',
 # assumes the (alphabetically) first picture in the folder has been taken of
 # Xrite color chart (i.e., this picture will not be analyzed) and all the other
 # pictures are taken of sample holder (these pictures will be analyzed). 
-pic_folder = 'C:\\Users\\tomim\OneDrive\Työpöytä\Työt\Python\Example data and code - RGB\Data\\20201112-R1-RN\BMP'
+pic_folder = 'C:\\Users\\tomim\\OneDrive\\Työpöytä\\Työt\\Python\\20201114-R1-RN\\20201114-R1-RN\\BMP'
+#pic_folder = 'C:\\Users\\tomim\OneDrive\Työpöytä\Työt\Python\Example data and code - RGB\Data\\20201112-R1-RN\BMP'
 # Give the name of the picture that has been taken taken of Xrite color chart.
-pic_name_Xrite = '20201112223424.bmp'
+pic_name_Xrite = '20201114144323.bmp'
 
 # Give the settings for finding the samples and color chart patches from the
 # pics.
 # Optimize using Color_operations.py if necessary. Explanations in the same ile.
-crop_box_CC = (483,200,680,320) # Small color chart
+crop_box_CC = (430,41,710,215) # Small color chart
 offset_array_CC = [[8,8],[8,8]]
-crop_box_samples = (270,390,785,845) # Films on sample holder
+crop_box_samples = (280,330,830,830) # Films on sample holder
 offset_array_samples = [[33,18],[18,18]]
-crop_box_Xrite = (380,250+240,830,790) # Xrite passport
+crop_box_Xrite = (355,500,800,800) # Xrite passport
 offset_array_Xrite = [[20,20],[20,20]]
 
 # How often do you want to print out figures? The cropping of every nth pic
 # will be printed to the console. For short aging tests, value 1 is
 # good, for very long ones you might put even 250 to make the code run faster.
-print_out_interval = 3
+print_out_interval = 200
 
 ###############################################################################
 
@@ -195,7 +196,8 @@ sample_description = [sample_holder_locations, sample_ids, sample_compositions,
 
 
 
-
+rgb_extractor_Xrite_CC(pic_folder, pic_name_Xrite,
+                                    crop_box_Xrite, offset_array_Xrite)
 
 # THE RESULTS in rgb color space (no color calibration)
 results_rgb = rgb_extractor(pic_folder, crop_box_samples, offset_array_samples,
